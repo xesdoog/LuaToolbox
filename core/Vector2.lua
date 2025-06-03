@@ -11,7 +11,7 @@
     The above copyright notice and this permission notice shall be included in
     all copies or substantial portions of the Software.
 
-    Except as contained in this notice, the name(s) of the above copyright holders
+    Except as contained in this notice, the name(s) of the above copyright holder(s)
     shall not be used in advertising or otherwise to promote the sale, use or
     other dealings in this Software without prior written authorization.
 
@@ -25,10 +25,11 @@
 ]]
 
 
+
 ---@class vec2
 ---@field x number
 ---@field y number
-vec2 = {}
+local vec2 = {}
 vec2.__index = vec2
 
 setmetatable(
@@ -52,7 +53,6 @@ function vec2:assert(arg)
         )
     end
 end
-
 
 -- Constructor
 ---@param x number
@@ -148,7 +148,7 @@ end
 
 ---@return vec2
 function vec2:__unm()
-	return vec2:new(-self.x, -self.y)
+    return vec2:new(-self.x, -self.y)
 end
 
 ---@return number, number
@@ -158,7 +158,7 @@ end
 
 ---@return number
 function vec2:length()
-    return math.sqrt(self.x^2 + self.y^2)
+    return math.sqrt(self.x ^ 2 + self.y ^ 2)
 end
 
 ---@param b vec2
@@ -166,12 +166,11 @@ end
 function vec2:distance(b)
     b = self:assert(b)
 
-    local dist_x = (self.x - b.x)^2
-    local dist_y = (self.y - b.y)^2
+    local dist_x = (self.x - b.x) ^ 2
+    local dist_y = (self.y - b.y) ^ 2
 
     return math.sqrt(dist_x + dist_y)
 end
-
 
 ---@return number
 function vec2:dot(b)
@@ -228,9 +227,9 @@ end
 ---@param n number
 ---@return vec2
 function vec2:rotate(n)
-	local a, b = math.cos(n), math.sin(n)
+    local a, b = math.cos(n), math.sin(n)
 
-	return vec2:new(
+    return vec2:new(
         a * self.x - b * self.y,
         b * self.x + a * self.y
     )
@@ -239,21 +238,23 @@ end
 ---@param atLength number
 ---@return vec2
 function vec2:trim(atLength)
-	local s = atLength * atLength / self:length()
+    local s = atLength * atLength / self:length()
 
-	s = (s > 1) and 1 or math.sqrt(s)
-	return vec2:new(self.x * s, self.y * s)
+    s = (s > 1) and 1 or math.sqrt(s)
+    return vec2:new(self.x * s, self.y * s)
 end
 
 ---@param angle number
 ---@param radius? number
 ---@return vec2
 function vec2:from_polar(angle, radius)
-	radius = radius or 1
-	return vec2:new(math.cos(angle) * radius, math.sin(angle) * radius)
+    radius = radius or 1
+    return vec2:new(math.cos(angle) * radius, math.sin(angle) * radius)
 end
 
 ---@return number, number
 function vec2:to_polar()
-	return math.atan(self.y, self.x), self:length()
+    return math.atan(self.y, self.x), self:length()
 end
+
+return vec2

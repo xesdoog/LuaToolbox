@@ -11,7 +11,7 @@
     The above copyright notice and this permission notice shall be included in
     all copies or substantial portions of the Software.
 
-    Except as contained in this notice, the name(s) of the above copyright holders
+    Except as contained in this notice, the name(s) of the above copyright holder(s)
     shall not be used in advertising or otherwise to promote the sale, use or
     other dealings in this Software without prior written authorization.
 
@@ -23,6 +23,7 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
     THE SOFTWARE.
 ]]
+
 
 
 ---@class Time

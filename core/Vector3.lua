@@ -11,7 +11,7 @@
     The above copyright notice and this permission notice shall be included in
     all copies or substantial portions of the Software.
 
-    Except as contained in this notice, the name(s) of the above copyright holders
+    Except as contained in this notice, the name(s) of the above copyright holder(s)
     shall not be used in advertising or otherwise to promote the sale, use or
     other dealings in this Software without prior written authorization.
 
@@ -25,11 +25,12 @@
 ]]
 
 
+
 ---@class vec3
 ---@field x number
 ---@field y number
 ---@field z number
-vec3 = {}
+local vec3 = {}
 vec3.__index = vec3
 
 setmetatable(
@@ -53,7 +54,6 @@ function vec3:assert(arg)
         )
     end
 end
-
 
 -- Constructor
 ---@param x number
@@ -150,7 +150,7 @@ end
 
 ---@return number
 function vec3:length()
-    return math.sqrt(self.x^2 + self.y^2 + self.z^2)
+    return math.sqrt(self.x ^ 2 + self.y ^ 2 + self.z ^ 2)
 end
 
 ---@param b vec3
@@ -166,9 +166,9 @@ end
 function vec3:distance(b)
     b = self:assert(b)
 
-    local dist_x = (self.x - b.x)^2
-    local dist_y = (self.y - b.y)^2
-    local dist_z = (self.z - b.z)^2
+    local dist_x = (self.x - b.x) ^ 2
+    local dist_y = (self.y - b.y) ^ 2
+    local dist_z = (self.z - b.z) ^ 2
 
     return math.sqrt(dist_x + dist_y + dist_z)
 end
@@ -223,7 +223,9 @@ function vec3:is_zero()
     return self.x == 0 and self.y == 0 and self.z == 0
 end
 
----@return vec2
-function vec3:as_vec2()
-    return vec2:new(self.x, self.y)
-end
+-- ---@return vec2
+-- function vec3:as_vec2()
+--     return vec2:new(self.x, self.y)
+-- end
+
+return vec3
