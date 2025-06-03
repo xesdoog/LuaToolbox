@@ -52,8 +52,7 @@ end
 ---@return boolean
 function table.isarray(t)
     if type(t) ~= "table" then
-        return
-            false
+        return false
     end
 
     local i = 0
@@ -87,7 +86,7 @@ table.getlen = function(t)
     return count
 end
 
--- Returns the number of duplicate items in a table.
+-- Returns the number of duplicate values in a table.
 ---@param t table
 ---@param value string | number | integer | table
 table.getdupes = function(t, value)
