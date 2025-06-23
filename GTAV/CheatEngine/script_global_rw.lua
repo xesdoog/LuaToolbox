@@ -41,7 +41,7 @@ end
 ScriptGlobal.new = function(index)
     return setmetatable(
         {
-            address = readQword(getAddress(SG_PTR) + ((index >> 0x12 & 0x3F) * 8)) + ((index & 0x3FFFF) * 8) -- int64_t
+            m_address = readQword(getAddress(SG_PTR) + ((index >> 0x12 & 0x3F) * 8)) + ((index & 0x3FFFF) * 8) -- int64_t
         },
         ScriptGlobal
     )
