@@ -14,7 +14,7 @@ local function ResolveGlobalPTR()
     return ptr
 end
 
-local SG_PTR = SG_PTR or ResolveGlobalPTR()
+SG_PTR = SG_PTR or ResolveGlobalPTR()
 
 
 ---@class ScriptGlobal
