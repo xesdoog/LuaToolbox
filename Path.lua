@@ -26,29 +26,29 @@
 
 
 
-local path = {}
+os.path = {}
 
-path.sep = package.config:sub(1, 1) or "/"
-path.isNT = path.sep == "\\"
+local sep = package.config:sub(1, 1) or "/"
+os.isNT = (sep == "\\")
 
 -- Returns the last part of the path
 ---@param p string
-function path.basename(p)
-    return p:match("([^" .. path.sep .. "]+)$") or ""
+function os.path.basename(p)
+    return p:match("([^" .. sep .. "]+)$") or ""
 end
 
 -- Returns the directory part of the path
 ---@param p string
-function path.dirname(p)
-    local i = p:match(".*()" .. path.sep)
+function os.path.dirname(p)
+    local i = p:match(".*()" .. sep)
     return i and p:sub(1, i - 1) or ""
 end
 
 -- Returns the file extension if the path is a file
 ---@param p string
 ---@return string|nil
-function path.ext(p)
-    local name = path.basename(p)
+function os.path.ext(p)
+    local name = os.path.basename(p)
     local i = name:match("^.*()%.")
 
     if i and i > 1 then
@@ -59,23 +59,23 @@ function path.ext(p)
 end
 
 -- Joins multiple path segments
-function path.join(...)
+function os.path.join(...)
     local parts = (type(...) == "table") and ... or { ... }
-    return table.concat(parts, path.sep):gsub(path.sep .. "+", path.sep)
+    return table.concat(parts, sep):gsub(sep .. "+", sep)
 end
 
 -- Splits path into {dir, file}
 ---@param p string
-function path.split(p)
-    return path.dirname(p), path.basename(p)
+function os.path.split(p)
+    return os.path.dirname(p), os.path.basename(p)
 end
 
 -- Normalizes path (removes ., ..)
 ---@param p string
-function path.normalize(p)
+function os.path.normalize(p)
     local parts = {}
 
-    for part in p:gmatch("[^" .. path.sep .. "]+") do
+    for part in p:gmatch("[^" .. sep .. "]+") do
         if part == ".." then
             if #parts > 0 then table.remove(parts) end
         elseif part ~= "." and part ~= "" then
@@ -83,19 +83,19 @@ function path.normalize(p)
         end
     end
 
-    local prefix = (p:sub(1, 1) == path.sep) and path.sep or ""
-    return prefix .. table.concat(parts, path.sep)
+    local prefix = (p:sub(1, 1) == sep) and sep or ""
+    return prefix .. table.concat(parts, sep)
 end
 
 -- Returns true if path is absolute
 ---@param p string
-function path.isabs(p)
-    return p:sub(1, 1) == path.sep or p:match("^%a:[/\\]") ~= nil
+function os.path.isabs(p)
+    return p:sub(1, 1) == sep or p:match("^%a:[/\\]") ~= nil
 end
 
 -- Check if path exists and is a file
 ---@param p string
-function path.isfile(p)
+function os.path.isfile(p)
     local f = io.open(p, "r")
 
     if f then
@@ -108,8 +108,7 @@ end
 
 -- Check if path exists and is a directory
 ---@param p string
-function path.isdir(p)
-    local sep = path.sep
+function os.path.isdir(p)
     local test = p:sub(-1) == sep and p or (p .. sep)
     local ok, _, code = os.rename(test, test)
 
@@ -123,13 +122,11 @@ end
 -- Convert relative path to absolute, if you know the base path.
 ---@param p string
 ---@param base string
-function path.abspath(p, base)
-    if path.isabs(p) then
-        return path.normalize(p)
+function os.path.abspath(p, base)
+    if os.path.isabs(p) then
+        return os.path.normalize(p)
     end
 
     base = base or "."
-    return path.normalize(path.join(base, p))
+    return os.path.normalize(os.path.join(base, p))
 end
-
-return path

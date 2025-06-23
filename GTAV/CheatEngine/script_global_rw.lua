@@ -1,0 +1,146 @@
+---@diagnostic disable
+
+local function ResolveGlobalPTR()
+    autoAssemble([[
+        aobscanmodule(SG_PTR, GTA5.exe, 48 8D 15 ? ? ? ? 4C 8B C0 E8 ? ? ? ? 48 85 FF 48 89 1D)
+        registerSymbol(SG_PTR)
+    ]])
+
+    local ptr = getAddress("SG_PTR")
+    -- https://github.com/Mr-X-GTA/YimMenu/blob/master/src/pointers.cpp#L142
+    ptr = ptr + readInteger(ptr + 3) + 7
+    unregisterSymbol("SG_PTR")
+    registerSymbol("SG_PTR", ptr, true)
+    return ptr
+end
+
+local SG_PTR = SG_PTR or ResolveGlobalPTR()
+
+
+---@class ScriptGlobal
+---@field m_address number
+---@overload fun(index: integer): ScriptGlobal
+local ScriptGlobal = {}
+setmetatable(
+    ScriptGlobal,
+    { __call = function(index) return ScriptGlobal.new(index) end }
+)
+
+ScriptGlobal.__index = function(self, key)
+    if ScriptGlobal[key] then
+        return ScriptGlobal[key]
+    elseif type(key) == "number" then
+        return ScriptGlobal.FromAddress(self.m_address + key * 8)
+    end
+end
+
+ScriptGlobal.__tostring = function(self)
+    return string.format("Global<0x%X>", self.m_address)
+end
+
+ScriptGlobal.new = function(index)
+    return setmetatable(
+        {
+            address = readQword(getAddress(SG_PTR) + ((index >> 0x12 & 0x3F) * 8)) + ((index & 0x3FFFF) * 8) -- int64_t
+        },
+        ScriptGlobal
+    )
+end
+
+---@param offset number
+function ScriptGlobal:At(offset)
+    return ScriptGlobal.FromAddress(self.m_address + offset * 8)
+end
+
+---@param address integer
+---@return ScriptGlobal
+function ScriptGlobal.FromAddress(address)
+    return setmetatable({ m_address = address }, ScriptGlobal)
+end
+
+function ScriptGlobal:GetAddress()
+    return self.m_address
+end
+
+function ScriptGlobal:GetPtr()
+    return readPointer(self.m_address)
+end
+
+---@param numOfBytes number
+---@param asTable? boolean
+---@return number
+function ScriptGlobal:ReadBytes(numOfBytes, asTable)
+    return readBytes(self.m_address, numOfBytes, asTable)
+end
+
+---@param ... any -- Btyes to write (table or tuple)
+function ScriptGlobal:WriteBytes(...)
+    writeBytes(self.m_address, ...)
+end
+
+---@return number
+function ScriptGlobal:ReadWord()
+    return readSmallInteger(self.m_address)
+end
+
+---@param value number
+function ScriptGlobal:WriteWord(value)
+    return writeSmallInteger(self.m_address, value)
+end
+
+---@return number
+function ScriptGlobal:ReadInt()
+    return readInteger(self.m_address, true)
+end
+
+---@param value number
+function ScriptGlobal:WriteInt(value)
+    return writeInteger(self.m_address, value)
+end
+
+---@return number
+function ScriptGlobal:ReadUint()
+    return readInteger(self.m_address, false)
+end
+
+---@param value number
+function ScriptGlobal:WriteUint(value)
+    return writeInteger(self.m_address, value)
+end
+
+---@return number
+function ScriptGlobal:ReadQword()
+    return readQword(self.m_address)
+end
+
+---@param value number
+function ScriptGlobal:WriteQword(value)
+    writeQword(self.m_address, value)
+end
+
+---@return number
+function ScriptGlobal:ReadFloat()
+    return readFloat(self.m_address)
+end
+
+---@param value number
+function ScriptGlobal:WriteFloat(value)
+    return writeFloat(self.m_address, value)
+end
+
+---@param maxLength number
+---@return string
+function ScriptGlobal:ReadString(maxLength)
+    return readString(self.m_address, maxLength, false)
+end
+
+---@param value string
+function ScriptGlobal:WriteString(value)
+    return writeString(self.m_address, value, false)
+end
+
+-- test
+local fKickVotesNeededRatio = ScriptGlobal(262145):At(6):ReadFloat()
+assert(math.abs(fKickVotesNeededRatio - 0.66) < 0.01, "Samurai, you're a dumbass.")
+
+return ScriptGlobal
