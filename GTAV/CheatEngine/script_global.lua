@@ -1,20 +1,20 @@
 ---@diagnostic disable
 
-local function ResolveGlobalPTR()
-    autoAssemble([[
-        aobscanmodule(SG_PTR, GTA5.exe, 48 8D 15 ? ? ? ? 4C 8B C0 E8 ? ? ? ? 48 85 FF 48 89 1D)
-        registerSymbol(SG_PTR)
-    ]])
+openProcess("GTA5.exe")
 
-    local ptr = getAddress("SG_PTR")
-    -- https://github.com/Mr-X-GTA/YimMenu/blob/master/src/pointers.cpp#L142
-    ptr = ptr + readInteger(ptr + 3) + 7
-    unregisterSymbol("SG_PTR")
-    registerSymbol("SG_PTR", ptr, true)
-    return ptr
-end
+local ok = autoAssemble([[
+aobscanmodule(SG_PTR, GTA5.exe, 48 8D 15 ? ? ? ? 4C 8B C0 E8 ? ? ? ? 48 85 FF 48 89 1D)
+registerSymbol(SG_PTR)
+]])
 
-SG_PTR = SG_PTR or ResolveGlobalPTR()
+assert(ok, "Failed to find pattern!")
+
+local SG_PTR = getAddress("SG_PTR")
+-- https://github.com/Mr-X-GTA/YimMenu/blob/master/src/pointers.cpp#L142
+SG_PTR = SG_PTR + readInteger(SG_PTR + 3) + 7
+unregisterSymbol("SG_PTR")
+registerSymbol("SG_PTR", SG_PTR, true)
+
 
 
 ---@class ScriptGlobal
@@ -23,7 +23,7 @@ SG_PTR = SG_PTR or ResolveGlobalPTR()
 local ScriptGlobal = {}
 setmetatable(
     ScriptGlobal,
-    { __call = function(index) return ScriptGlobal.new(index) end }
+    { __call = function(_, index) return ScriptGlobal.new(index) end }
 )
 
 ScriptGlobal.__index = function(self, key)
