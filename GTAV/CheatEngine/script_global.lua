@@ -19,14 +19,53 @@ registerSymbol("SG_PTR", SG_PTR, true)
 
 ---@class ScriptGlobal
 ---@field m_address number
----@overload fun(index: integer): ScriptGlobal
+---@overload fun(address: integer): ScriptGlobal
 local ScriptGlobal = {}
 setmetatable(
     ScriptGlobal,
-    { __call = function(_, index) return ScriptGlobal.new(index) end }
+    { 
+        __call = function(_, address)
+            return ScriptGlobal.new(address)
+        end
+    }
 )
 
-ScriptGlobal.__index = function(self, key)
+--------------------------
+-- Constructors (2)
+--------------------------
+
+---@param address integer
+---@return ScriptGlobal
+function ScriptGlobal.new(address)
+    assert(type(address) == "number")
+
+    return setmetatable(
+        {
+            m_address = readQword(getAddress(SG_PTR)
+            + ((address >> 0x12 & 0x3F) * 8))
+            + ((address & 0x3FFFF) * 8)
+        },
+        ScriptGlobal
+    )
+end
+
+-- Internal
+---@param address integer
+---@return ScriptGlobal
+function ScriptGlobal.FromAddress(address)
+    assert(type(address) == "number")
+
+    return setmetatable(
+        {
+            m_address = address
+        },
+        ScriptGlobal
+    )
+end
+
+--------------------------
+
+function ScriptGlobal:__index(key)
     if ScriptGlobal[key] then
         return ScriptGlobal[key]
     elseif type(key) == "number" then
@@ -34,17 +73,8 @@ ScriptGlobal.__index = function(self, key)
     end
 end
 
-ScriptGlobal.__tostring = function(self)
-    return string.format("Global<0x%X>", self.m_address)
-end
-
-ScriptGlobal.new = function(index)
-    return setmetatable(
-        {
-            m_address = readQword(getAddress(SG_PTR) + ((index >> 0x12 & 0x3F) * 8)) + ((index & 0x3FFFF) * 8) -- int64_t
-        },
-        ScriptGlobal
-    )
+function ScriptGlobal:__tostring()
+    return string.format("Global_%d", self.m_address)
 end
 
 ---@param offset number
@@ -52,23 +82,18 @@ function ScriptGlobal:At(offset)
     return ScriptGlobal.FromAddress(self.m_address + offset * 8)
 end
 
----@param address integer
----@return ScriptGlobal
-function ScriptGlobal.FromAddress(address)
-    return setmetatable({ m_address = address }, ScriptGlobal)
-end
-
 function ScriptGlobal:GetAddress()
     return self.m_address
 end
 
-function ScriptGlobal:GetPtr()
+-- Same as `ReadInt` for a 32bit process and `ReadQword` for 64bit
+function ScriptGlobal:ReadPointer()
     return readPointer(self.m_address)
 end
 
 ---@param numOfBytes number
----@param asTable? boolean
----@return number
+---@param asTable? boolean return the result as table instead of tuple
+---@return bytes|table
 function ScriptGlobal:ReadBytes(numOfBytes, asTable)
     return readBytes(self.m_address, numOfBytes, asTable)
 end
